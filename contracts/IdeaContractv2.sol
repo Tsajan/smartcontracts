@@ -7,9 +7,10 @@ contract IdeaContractv2 {
         string status; // 0: Pending, 1: Approved, 2: Rejected, 3: Duplicate
         uint256 cost;
         uint256 timestamp;
+        mapping(address => bool) userLikes;
         uint256 likeCount;
     }
-    
+
     mapping(uint => Idea) public ideas;
     uint public ideaCount;
     address public admin;
@@ -63,18 +64,10 @@ contract IdeaContractv2 {
     
     function likeIdea(uint _ideaId) external {
         require(_ideaId < ideaCount, "Invalid idea ID.");
-        
+        require(!ideas[_ideaId].userLikes[msg.sender], "User has already liked the idea");
+        ideas[_ideaId].userLikes[msg.sender] = true;
         ideas[_ideaId].likeCount++;
         
         emit IdeaLiked(_ideaId, msg.sender);
-    }
-
-    function getAllIdeas() external view returns (Idea[] memory) {
-        Idea[] memory allIdeas = new Idea[](ideaCount);
-
-        for(uint256 i=0; i < ideaCount; i++) {
-            allIdeas[i] = ideas[i];
-        }
-        return allIdeas;
     }
 }
