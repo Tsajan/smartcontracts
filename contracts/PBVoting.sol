@@ -61,7 +61,7 @@ contract PBVoting {
 
     // function to add a new project with its cost
     function addProject(uint256 projectId, string memory projectName, uint256 cost) external onlyOwner {
-        require(projectId > 0, "Invalid project ID");
+        require(projectId >= 0, "Invalid project ID");
         require(cost > 0, "Invalid project cost");
         require(bytes(projectName).length > 0, "Project name is required");
         projects.push(Project(projectId, projectName, cost));
