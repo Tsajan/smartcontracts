@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IPBRewardToken {
-    function mint(address to, uint256 amount) external;
-}
-contract PBVotingv2 {
+import "./interface/IPBRewardToken.sol";
+
+contract PBApprovalVoting {
+
+    IPBRewardToken public pbRewardToken;
 
     // structure to store the details of a given project
     struct Project {
@@ -28,8 +29,6 @@ contract PBVotingv2 {
     Project[] public projects;
     Result[] public results;
 
-    IPBRewardToken public rewardToken;
-
     mapping(address => uint256[]) public userVotes;
     mapping(address => bool) public hasVoted;
 
@@ -39,8 +38,9 @@ contract PBVotingv2 {
 
     event UserVoted(address userAddress, uint256[] projectIds);
 
-    constructor() {
+    constructor(address _tokenAddress) {
         owner = msg.sender;
+        pbRewardToken = IPBRewardToken(_tokenAddress);
     }
 
     modifier onlyDuringVotingPeriod() {
@@ -93,7 +93,7 @@ contract PBVotingv2 {
         emit UserVoted(msg.sender, _projectSelections);
 
         // mint reward token to the user
-        IPBRewardToken(rewardToken).mint(msg.sender, 100);
+        pbRewardToken.mint(msg.sender, 5 * 10 ** 18); // rewards 5 tokens upon ideas
 
         // aggregate votes
         for (uint256 i = 0; i < _projectSelections.length; i++) {
