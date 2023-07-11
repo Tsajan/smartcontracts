@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract IdeaContractv2 {
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./PBRewardToken.sol";
+
+contract ProjectIdea {
     struct Idea {
         string description;
         address proposer;
@@ -14,6 +18,8 @@ contract IdeaContractv2 {
     mapping(uint => Idea) public ideas;
     uint public ideaCount;
     address public admin;
+
+    IERC20 public pbRewardToken;
     
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only the admin can call this function.");
@@ -25,8 +31,9 @@ contract IdeaContractv2 {
     event IdeaCostUpdated(uint256 indexed ideaId, uint256 newCost);
     event IdeaLiked(uint256 indexed ideaId, address indexed liker);
     
-    constructor() {
+    constructor(address _tokenAddress) {
         admin = msg.sender;
+        pbRewardToken = IERC20(_tokenAddress);
     }
     
     function proposeIdea(string memory _description, uint256 _cost) external {
@@ -50,6 +57,13 @@ contract IdeaContractv2 {
         require(keccak256(abi.encodePacked(_newStatus)) == keccak256(abi.encodePacked("approved")) || keccak256(abi.encodePacked(_newStatus)) == keccak256(abi.encodePacked("rejected")) || keccak256(abi.encodePacked(_newStatus)) == keccak256(abi.encodePacked("duplicate")), "Invalid status value."); // 1: Approved, 2: Rejected, 3: Duplicate
         
         ideas[_ideaId].status = _newStatus;
+        
+        // if the proposedIdea is approved, reward the user with erc-20 tokens
+        if(keccak256(abi.encodePacked(_newStatus)) == keccak256(abi.encodePacked("approved"))) {
+            address tobeRewardedAddr = ideas[_ideaId].proposer;
+            pbRewardToken.mint(tobeRewardedAddr, 5 * 10 ** 18); // rewards 5 tokens upon ideas being approved
+        }
+        
         
         emit IdeaStatusUpdated(_ideaId, _newStatus);
     }
