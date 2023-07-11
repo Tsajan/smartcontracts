@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+interface IPBRewardToken {
+    function mint(address to, uint256 amount) external;
+}
 contract PBVotingv2 {
 
     // structure to store the details of a given project
@@ -24,7 +27,9 @@ contract PBVotingv2 {
     uint256 public totalBudget;
     Project[] public projects;
     Result[] public results;
-    
+
+    IPBRewardToken public rewardToken;
+
     mapping(address => uint256[]) public userVotes;
     mapping(address => bool) public hasVoted;
 
@@ -68,7 +73,7 @@ contract PBVotingv2 {
         require(!hasVoted[msg.sender], "Voter has already voted");
         require(votingOpen, "Voting is not currently open");
         require(_projectSelections.length == projects.length, "Should provide approval vote for all set of available projects");
-        
+
         uint256 totalProjectCost = 0;
 
         for (uint256 i=0; i < _projectSelections.length; i++) {
@@ -87,6 +92,8 @@ contract PBVotingv2 {
         hasVoted[msg.sender] = true; // prevent re-voting by the same user
         emit UserVoted(msg.sender, _projectSelections);
 
+        // mint reward token to the user
+        IPBRewardToken(rewardToken).mint(msg.sender, 100);
 
         // aggregate votes
         for (uint256 i = 0; i < _projectSelections.length; i++) {
