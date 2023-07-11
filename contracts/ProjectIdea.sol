@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./interface/IPBRewardToken.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./PBRewardToken.sol";
 
-interface IPBRewardToken {
-    function mint(address to, uint256 amount) external;
-}
 contract ProjectIdea {
     struct Idea {
         string description;
